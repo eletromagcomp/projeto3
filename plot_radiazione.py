@@ -1,18 +1,21 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct  5 07:48:15 2019
-
-@author: lordemomo
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from celluloid import Camera
 import projeto2 as old
 
-def plot_rad(potencial):
+def A():
+    return 0.4
 
+def w():
+    return np.pi
+
+def posicao_y_da_carga(t):
+        return A()*np.cos(w()*t)
+
+def posicao_x_da_carga(t):
+        return A()*np.cos(w()*t)
+
+def plot_rad(potencial):
     #Campo baseado no potencial antigo    
     Ey = np.roll(potencial, 1, axis=0) - np.roll(potencial, -1, axis=0) 
     Ex = np.roll(potencial, 1, axis=1) - np.roll(potencial, -1, axis=1)
@@ -20,20 +23,14 @@ def plot_rad(potencial):
     #Coordenadas
     x = np.linspace(-1, 1, old.n_malha())
     y = np.linspace(-1, 1, old.n_malha())
-    X, Y = np.meshgrid(x, y)
-    
-    A = 0.4
-    w = np.pi
-    
-    def posicao_y_da_carga(t):
-        return A*np.cos(w*t)
+    X, Y = np.meshgrid(x, y)    
     
     figure, ax = plt.subplots()
     figure.set_size_inches((7,7))
     camera = Camera(figure)
     for t in range(20):
         Ry = Y - posicao_y_da_carga(t/10)
-        Rx = X
+        Rx = X - posicao_x_da_carga(t/10)
         radiation = np.abs(Ry*Ey + Rx*Ex)
         
         ax.pcolor(radiation, cmap=plt.cm.inferno_r)
