@@ -103,13 +103,8 @@ for t in t_interval:
             guess = t_ret
             electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
     print('t =' + str(t) + ' terminado')
-    seed_points_x = np.arange(0, 10)
-    seed_points_z = np.sqrt(9**2 - seed_points_x**2)
-    seed_points_x = np.concatenate(-seed_points_x, seed_points_x)
-    seed_points_z = np.concatenate(-seed_points_z, seed_points_z)
-    seed_points = np.array(seed_points_x, seed_points_z)
     ax.streamplot(x, z, electric_x, electric_z, color='black', linewidth=1, cmap=plt.cm.inferno, 
-                      density=1, arrowstyle='->', start_points = seed_points, arrowsize=1.5)
+                      density=1, arrowstyle='->', arrowsize=1.5)
     x_charge, y_charge, z_charge = charge_position(t)
     ax.plot(x_charge, z_charge, 'bo')
     ax.set_aspect('equal')
