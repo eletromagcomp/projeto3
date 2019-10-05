@@ -20,10 +20,10 @@ def amplitude():
     return 5
 
 def v_max():
-    return 0.5
+    return 0.8
 
 def time_step():
-    return 0.5
+    return 1
 
 def n_ciclos():
     return 1  
@@ -31,16 +31,16 @@ def n_ciclos():
 #%% TEMPO RETARDADO
 def t_retarded(t_ret,*args):
     x,y,z = xyz
-    return (x**2 + y**2 + (z - amplitude()*np.cos(v_max()*t_ret/amplitude()))**2)**(1/2) - (t - t_ret)
+    return ((x - 0.5)**2 + y**2 + (z - amplitude()*np.cos(v_max()*t_ret/amplitude()))**2)**(1/2) - (t - t_ret)
 
 #%% DERIVADA TEMPO RETARDADO
 def t_retarded_prime(t_ret, *args):
     x,y,z = xyz
-    return (v_max()*np.sin(t_ret*v_max()/amplitude()) *(z - amplitude()*np.cos(t_ret*v_max()/amplitude())))/(np.sqrt((z - amplitude()*np.cos(t_ret*v_max()/amplitude()))**2 + x**2 + y**2)) + 1
+    return (v_max()*np.sin(t_ret*v_max()/amplitude())*(z - amplitude()*np.cos(t_ret*v_max()/amplitude())))*((z - amplitude()*np.cos(t_ret*v_max()/amplitude()))**2 + (x- 0.5)**2 + y**2)**(-1/2) + 1
 
 #%%
 def charge_position(t_ret):
-    x = 0
+    x = 0.5
     y = 0
     z = amplitude()*np.cos(t_ret*v_max()/amplitude())
     xyz_charge = np.array((x, y, z))
@@ -81,31 +81,41 @@ x = np.arange(-n_malha()/2, n_malha()/2)
 y = 0
 z = np.arange(-n_malha()/2, n_malha()/2)
 malha_t_ret = np.zeros((n_malha(), n_malha()))
-t = 50
-x0 = 1
+periodo = 2*np.pi/(v_max()/amplitude())
+t_interval = np.arange(0, n_ciclos()*periodo, time_step())
+guess = 1
 electric_x = np.zeros((n_malha(), n_malha()))
 electric_y = np.zeros((n_malha(), n_malha()))
 electric_z = np.zeros((n_malha(), n_malha()))
-start = time.time()
 
-for i in range(n_malha()):
-    for j in range(n_malha()):
-        xyz = np.array((x[i], y, z[j]))
-        t_ret = newton(t_retarded, x0, fprime=t_retarded_prime, args=(xyz, t))
-        malha_t_ret[i,j] = t_ret
-        x0 = t_ret
-        
-        electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
-end = time.time()
-tempo = end - start
-print(tempo)
+
+start = time.time()
 
 figure, ax = plt.subplots()
 figure.set_size_inches((7,7))
 camera = Camera(figure)
-ax.streamplot(z, x, electric_z, electric_x, linewidth=1, cmap=plt.cm.inferno, 
-                      density=1, arrowstyle='->', arrowsize=1.5)
-ax.set_aspect('equal')
-camera.snap()
+for t in t_interval:
+    for i in range(n_malha()):
+        for j in range(n_malha()):
+            xyz = np.array((x[i], y, z[j]))
+            t_ret = newton(t_retarded, guess, fprime=t_retarded_prime, args=(xyz, t))
+            malha_t_ret[i,j] = t_ret
+            guess = t_ret
+            electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
+    print('t =' + str(t) + ' terminado')
+    seed_points_x = np.arange(0, 10)
+    seed_points_z = np.sqrt(9**2 - seed_points_x**2)
+    seed_points_x = np.concatenate(-seed_points_x, seed_points_x)
+    seed_points_z = np.concatenate(-seed_points_z, seed_points_z)
+    seed_points = np.array(seed_points_x, seed_points_z)
+    ax.streamplot(x, z, electric_x, electric_z, color='black', linewidth=1, cmap=plt.cm.inferno, 
+                      density=1, arrowstyle='->', start_points = seed_points, arrowsize=1.5)
+    x_charge, y_charge, z_charge = charge_position(t)
+    ax.plot(x_charge, z_charge, 'bo')
+    ax.set_aspect('equal')
+    camera.snap()
+end = time.time()
+tempo = end - start
+print(tempo)
 animation = camera.animate()
-animation.save('celluloid_minimal.gif', writer = 'imagemagick')
+animation.save('celluloid_minimal_2.gif', writer = 'imagemagick')
