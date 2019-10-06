@@ -1,5 +1,6 @@
 import numpy as np
-import matplotlib as plt
+import matplotlib.pyplot as plt
+import time
 
 def malha():
     m = np.zeros((201,201,2), dtype= 'int')
@@ -8,7 +9,7 @@ def malha():
             m[i][j] = np.array([i-100,j-100])
     return m
 
-tempo = np.arange(0,100)
+tempo = (0.0,30.0,100)
 
 #chute inicial para o tempo retardado
 def chute0():
@@ -24,7 +25,7 @@ def amplitude():
 
 #frequencia angular
 def omega():
-    return 0.01
+    return 0.05
 
 #PS: para termos sempre v<c devemos ter omega*amplitude < c=1
 
@@ -93,21 +94,35 @@ def campo_eletrico(t):
                         
             u = dR/dist - v
                         
-            E = ( (1-v[1]**2)*u*dist + np.array([dR[1],-dR[0]])*a[1]*r[0] )/np.sum(dR*u)**3
+            campo[i][j] = ( (1-v[1]**2)*u*dist + np.array([dR[1],-dR[0]])*a[1]*r[0] )/np.sum(dR*u)**3
+            
+            campo[200-i][j][0] = -campo[i][j][0]
+            campo[200-i][j][1] = campo[i][j][1]
     
-    return campo
+    return campo 
     
 t = 0.0    
+t0 = time.time()
 field = campo_eletrico(t)
+tf = time.time()
 
+print("tempo =", tf-t0)
 
-#botei um comentario brabo
+x = np.arange(-100,101)
+z = np.arange(-100,101)
 
+for t in tempo:
+    
+    field = campo_eletrico(1.0*t)
 
+    electric_x = np.transpose(field[:,:,0])
+    electric_z = np.transpose(field[:,:,1])
 
-
-
-
-
-
-
+    plt.streamplot(x,z , electric_x, electric_z, color='black', linewidth=1, cmap=plt.cm.inferno, 
+                      density=1, arrowstyle='->', arrowsize=1.5)
+    x_charge, z_charge = pos_carga(t)
+    plt.xlim(-100,100)
+    plt.ylim(-100,100)
+    plt.plot(x_charge, z_charge, 'bo')
+    #plt.set_aspect('equal')
+    plt.show()
