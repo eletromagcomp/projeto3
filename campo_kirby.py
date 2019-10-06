@@ -12,9 +12,6 @@ def malha():
     return m
 
 
-pi = math.pi
-tempo = np.linspace(0.0,2*pi/omega(),30) #cria a sequencia temporal onde sao calculados os campos varrendo 1 periodo
-
 #chute inicial para o tempo retardado
 def chute0():
     return 0.0 
@@ -117,15 +114,23 @@ print("tempo =", tf-t0) #tempo pra calcular em 1 instante
 x = np.arange(-100,101)
 z = np.arange(-100,101)
 
+
+pi = math.pi
+tempo = np.linspace(0.0,6*pi/omega(),90) #cria a sequencia temporal onde sao calculados os campos varrendo 3 periodos
+
+k=0
 for t in tempo:
     
-    print(t*omega()/(2*pi),t)
+    k=k+1
+    print(k,t)
     
     field = campo_eletrico(1.0*t)
 
     electric_x = np.transpose(field[:,:,0])
     electric_z = np.transpose(field[:,:,1])
 
+    plt.close(k-1)
+    plt.figure(k)
     plt.streamplot(x,z , electric_x, electric_z, color='black', linewidth=1, cmap=plt.cm.inferno, 
                       density=1, arrowstyle='->', arrowsize=1.5)
     x_charge, z_charge = pos_carga(t)
@@ -133,16 +138,4 @@ for t in tempo:
     plt.ylim(-100,100)
     plt.plot(x_charge, z_charge, 'bo')
     #plt.set_aspect('equal')
-    plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
+    plt.savefig(str(k)+".png")
