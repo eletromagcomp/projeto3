@@ -60,7 +60,7 @@ def f(r,t,t_ret):
     
 #calcula a derivada da funcao f(t_ret) da qual queremos as raizes
 def df(r,t,t_ret):
-    dist = np.sqrt( np.sum**2(r-pos_carga(t_ret) ) )
+    dist = np.sqrt( np.sum((r-pos_carga(t_ret))**2 ) )
     dfun = np.sum( (r-pos_carga(t_ret))*vel_carga(t_ret) )/dist - 1
     return dfun
     
@@ -93,7 +93,8 @@ def campo_eletrico(t):
             a = -w**2*(r-dR)         #aceleracao no tempo retardado
                         
             u = dR/dist - v
-                        
+            
+            #calcula o campo por aquela formula dado o tempo retardado. Eu uso alguma peculiaridades do nosso sistema (movimento unidimensional no eixo z "[1]" pra otimizar umas contas, abrindo umas componentes explicitamente) 
             campo[i][j] = ( (1-v[1]**2)*u*dist + np.array([dR[1],-dR[0]])*a[1]*r[0] )/np.sum(dR*u)**3
             
             campo[200-i][j][0] = -campo[i][j][0]
@@ -106,12 +107,14 @@ t0 = time.time()
 field = campo_eletrico(t)
 tf = time.time()
 
-print("tempo =", tf-t0)
+print("tempo =", tf-t0) #tempo pra calcular em 1 instante
 
 x = np.arange(-100,101)
 z = np.arange(-100,101)
 
 for t in tempo:
+    
+    print(t)
     
     field = campo_eletrico(1.0*t)
 
@@ -126,3 +129,15 @@ for t in tempo:
     plt.plot(x_charge, z_charge, 'bo')
     #plt.set_aspect('equal')
     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
