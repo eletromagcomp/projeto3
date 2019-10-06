@@ -101,16 +101,12 @@ def simulation(t):
     electric_xyz = np.array([electric_x, electric_y, electric_z])
     return  electric_xyz
 #%% PLOT
-def plot(electric_xyz):
+def plot(electric_x,electric_z):
     x = np.arange(-n_malha()/2, n_malha()/2)
     z = np.arange(-n_malha()/2, n_malha()/2)
     X, Z = np.meshgrid(x, z)
     x_charge, y_charge, z_charge = charge_position(t)
-    print(len(electric_xyz[0][0])
-    if (len(electric_xyz[0][0])==3):
-        electric_x, electric_y, electric_z = electric_xyz
-    if len(electric_xyz[0][0])==2:
-        electric_x, electric_z = electric_xyz
+
     
     #Carga
     ax_stream.plot(x_charge, z_charge, 'bo')
@@ -279,7 +275,8 @@ start = time.time()
 #Rodando para os diferentes intervalos de tempo
 for t in t_interval:
     electric_xyz = simulation(t)
-    plot(electric_xyz)
+    electric_x, electric_y, electric_z = electric_xyz
+    plot(electric_x, electric_z)
     print('t = ' + str(t) + ' de ' + str(t_interval[-1]))
     
 end = time.time()
@@ -299,11 +296,11 @@ for t in tempo:
     print(k,t)
     
     field = campo_eletrico(t)
+    electric_x = np.transpose(field[:,:,0])
+    electric_z = np.transpose(field[:,:,1])
     
-    plot(field)
-
-    #electric_x = np.transpose(field[:,:,0])
-    #electric_z = np.transpose(field[:,:,1])
+    plot(electric_x,electric_z)
+    
 
 #%%
 
