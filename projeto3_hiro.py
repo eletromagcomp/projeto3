@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import time
 from celluloid import Camera
 from scipy.optimize import newton
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 #%% VARIÁVEIS
 
@@ -94,12 +95,18 @@ theta = np.linspace(0,2*np.pi, 20)
 
 
 X,Z = np.meshgrid(x, z)
+X,Y = np.meshgrid(x, y)
 
 start = time.time()
+
+figure_radiation, ax_radiation = plt.subplots()
+figure_radiation.set_size_inches((7,7))
+camera_radiation = Camera(figure_radiation)
 
 figure, ax = plt.subplots()
 figure.set_size_inches((7,7))
 camera = Camera(figure)
+
 for t in t_interval:
     for i in range(n_malha()):
         for j in range(n_malha()):
@@ -108,14 +115,36 @@ for t in t_interval:
             malha_t_ret[i,j] = t_ret
             guess = t_ret
             electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
-    print('t =' + str(t) + ' terminado')
-    ax.streamplot(X, Z, electric_z, electric_x, color = 'black', arrowstyle='-', density = 2)
+    print('t = ' + str(t) + ' terminado')
+
+    ax.streamplot(X, Z, electric_x.transpose(), electric_z.transpose(), color = 'black', arrowstyle='-', density = 2)
     x_charge, y_charge, z_charge = charge_position(t)
-    ax.plot(z_charge, x_charge, 'bo')
+    ax.plot(x_charge, z_charge, 'bo')
     ax.set_aspect('equal')
     camera.snap()
+    
+    x_charge, y_charge, z_charge = charge_position(t)
+    Rz = Z - z_charge
+    Ry = Y - y_charge
+    Rx = X - x_charge
+    radiation = np.abs(Rz*electric_z + Rx*electric_x)
+    im = ax_radiation.pcolor(radiation.transpose(), cmap=plt.cm.inferno, vmin=0, vmax=1)
+    divider = make_axes_locatable(ax_radiation)
+    cax = divider.append_axes('right', size='5%', pad=0.05)
+    figure_radiation.colorbar(im, cax=cax)
+    ax_radiation.plot(x_charge+50, z_charge+51, 'bo')
+    camera_radiation.snap()
+
 end = time.time()
 tempo = end - start
-print(tempo)
-animation = camera.animate()
-animation.save('celluloid_minimal_2.gif', writer = 'imagemagick')
+print('######################' + str(tempo))
+
+#animation = camera.animate()
+#animation.save('celluloid_minimal_2.gif', writer = 'imagemagick')
+
+animation_radiation = camera_radiation.animate()
+animation_radiation.save('Radiation.gif', writer = 'imagemagick')
+
+end = time.time()
+tempo = end - start
+print('######################' + str(tempo))
