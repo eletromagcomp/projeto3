@@ -13,7 +13,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 #%% VARIÁVEIS
 def n_malha():
-    return 50
+    return 30
 
 def amplitude():
     return 2
@@ -115,12 +115,10 @@ def plot(electric_xyz):
     ax_both.streamplot(z, x, np.transpose(electric_x), np.transpose(electric_z), color = 'black', arrowstyle='-', density = 1.5)
     
     #Quiver
-    U = electric_z
-    V = electric_x
-    U = U / np.sqrt(U**2 + V**2);
-    V = V / np.sqrt(U**2 + V**2);
-    ax_quiver.quiver(Z, X, V, U, pivot='mid', color='r', units='inches')
-    ax_both.quiver(Z, X, V, U, pivot='mid', color='r', units='inches')
+    U = 3*electric_z / np.sqrt(electric_z**2 + electric_x**2);
+    V = 3*electric_x / np.sqrt(electric_z**2 + electric_x**2);
+    ax_quiver.quiver(Z[::3,::3], X[::3,::3], V[::3,::3], U[::3,::3], pivot='mid', color='r', units='inches')
+    ax_both.quiver(Z[::2,::2], X[::2,::2], V[::2,::2], U[::2,::2], pivot='mid', color='r', units='inches')
     
     #Radiação
     x_charge, y_charge, z_charge = charge_position(t)
