@@ -1,7 +1,9 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 import time
 
+#cria malha de dimensao 201 por 201
 def malha():
     m = np.zeros((201,201,2), dtype= 'int')
     for i in range(201):
@@ -9,7 +11,9 @@ def malha():
             m[i][j] = np.array([i-100,j-100])
     return m
 
-tempo = (0.0,30.0,100)
+
+pi = math.pi
+tempo = np.linspace(0.0,2*pi/omega(),30) #cria a sequencia temporal onde sao calculados os campos varrendo 1 periodo
 
 #chute inicial para o tempo retardado
 def chute0():
@@ -25,7 +29,7 @@ def amplitude():
 
 #frequencia angular
 def omega():
-    return 0.05
+    return 0.025
 
 #PS: para termos sempre v<c devemos ter omega*amplitude < c=1
 
@@ -97,6 +101,7 @@ def campo_eletrico(t):
             #calcula o campo por aquela formula dado o tempo retardado. Eu uso alguma peculiaridades do nosso sistema (movimento unidimensional no eixo z "[1]" pra otimizar umas contas, abrindo umas componentes explicitamente) 
             campo[i][j] = ( (1-v[1]**2)*u*dist + np.array([dR[1],-dR[0]])*a[1]*r[0] )/np.sum(dR*u)**3
             
+            #espelha o campo no eixo x
             campo[200-i][j][0] = -campo[i][j][0]
             campo[200-i][j][1] = campo[i][j][1]
     
@@ -114,7 +119,7 @@ z = np.arange(-100,101)
 
 for t in tempo:
     
-    print(t)
+    print(t*omega()/(2*pi),t)
     
     field = campo_eletrico(1.0*t)
 
