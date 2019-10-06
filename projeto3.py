@@ -10,6 +10,7 @@ import time
 from celluloid import Camera
 from scipy.optimize import newton
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import pdb
 
 #%% VARIÁVEIS
 def n_malha():
@@ -97,7 +98,7 @@ def simulation(t):
     electric_xyz = np.array([electric_x, electric_y, electric_z])
     return  electric_xyz
 #%% PLOT
-def plot(electric_xyz):
+def plot(electric_xyz, t):
     x = np.arange(-n_malha()/2, n_malha()/2)
     z = np.arange(-n_malha()/2, n_malha()/2)
     X, Z = np.meshgrid(x, z)
@@ -139,6 +140,13 @@ def plot(electric_xyz):
     camera_both.snap()
     camera_radiation.snap()
 
+#%%RUN
+def run(t_interval):
+    for t in t_interval:
+        electric_xyz = simulation(t)
+        plot(electric_xyz, t)
+        print('t = ' + str(t) + ' de ' + str(t_interval[-1]))
+
 #%% CÁLCULOS
 #Criar as figuras para os plots
 figure_stream, ax_stream = plt.subplots()
@@ -163,10 +171,12 @@ t_interval = np.arange(0, periodo(), time_step())
 start = time.time()
 
 #Rodando para os diferentes intervalos de tempo
-for t in t_interval:
-    electric_xyz = simulation(t)
-    plot(electric_xyz)
-    print('t = ' + str(t) + ' de ' + str(t_interval[-1]))
+run(t_interval)
+
+#for t in t_interval:
+#    electric_xyz = simulation(t)
+#    plot(electric_xyz)
+#    print('t = ' + str(t) + ' de ' + str(t_interval[-1]))
     
 end = time.time()
 tempo = end - start
