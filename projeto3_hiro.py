@@ -14,16 +14,16 @@ from scipy.optimize import newton
 #%% VARIÁVEIS
 
 def n_malha():
-    return 400
+    return 100
 
 def amplitude():
     return 5
 
 def v_max():
-    return 0.5
+    return 0.8
 
 def time_step():
-    return 1
+    return 0.5
 
 def n_ciclos():
     return 1  
@@ -77,7 +77,7 @@ def electric_field(t_ret, xyz):
     return electric
     
 #%%
-'''
+
 x = np.arange(-n_malha()/2, n_malha()/2)
 y = 0
 z = np.arange(-n_malha()/2, n_malha()/2)
@@ -90,6 +90,11 @@ electric_y = np.zeros((n_malha(), n_malha()))
 electric_z = np.zeros((n_malha(), n_malha()))
 
 
+theta = np.linspace(0,2*np.pi, 20)
+
+
+X,Z = np.meshgrid(x, z)
+
 start = time.time()
 
 figure, ax = plt.subplots()
@@ -99,18 +104,14 @@ for t in t_interval:
     for i in range(n_malha()):
         for j in range(n_malha()):
             xyz = np.array((x[i], y, z[j]))
-            t_ret = newton(t_retarded, guess, fprime=t_retarded_prime, args=(xyz, t))
+            t_ret = newton(t_retarded, guess, fprime=t_retarded_prime, args=(xyz, t), tol=10**(-3))
             malha_t_ret[i,j] = t_ret
             guess = t_ret
             electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
     print('t =' + str(t) + ' terminado')
-    seed_points_x = np.linspace(-10, 10, 20)
-    seed_points_z = np.sqrt(10**2 - seed_points_x**2)
-    seed_points = np.array([seed_points_x, seed_points_z])
-    ax.streamplot(x, z, electric_x, electric_z, color='black', linewidth=1, cmap=plt.cm.inferno, 
-                      density=1, arrowstyle='->', start_points = seed_points.T, arrowsize=1.5)
+    ax.streamplot(X, Z, electric_z, electric_x, color = 'black', arrowstyle='-', density = 2)
     x_charge, y_charge, z_charge = charge_position(t)
-    ax.plot(x_charge, z_charge, 'bo')
+    ax.plot(z_charge, x_charge, 'bo')
     ax.set_aspect('equal')
     camera.snap()
 end = time.time()
@@ -118,42 +119,3 @@ tempo = end - start
 print(tempo)
 animation = camera.animate()
 animation.save('celluloid_minimal_2.gif', writer = 'imagemagick')
-'''
-#%%
-x = np.arange(-n_malha()/2, n_malha()/2)
-y = 0
-z = np.arange(-n_malha()/2, n_malha()/2)
-malha_t_ret = np.zeros((n_malha(), n_malha()))
-periodo = 2*np.pi/(v_max()/amplitude())
-t = 50
-guess = 1
-electric_x = np.zeros((n_malha(), n_malha()))
-electric_y = np.zeros((n_malha(), n_malha()))
-electric_z = np.zeros((n_malha(), n_malha()))
-
-
-start = time.time()
-
-for i in range(n_malha()):
-    print(i)
-    for j in range(n_malha()):
-        xyz = np.array((x[i], y, z[j]))
-        t_ret = newton(t_retarded, guess, fprime=t_retarded_prime, args=(xyz, t))
-        malha_t_ret[i,j] = t_ret
-        guess = t_ret
-        electric_x[i, j], electric_y[i, j], electric_z[i, j] = electric_field(t_ret, xyz)
-#%%
-        
-figure, ax = plt.subplots()
-figure.set_size_inches((7,7))
-camera = Camera(figure)
-ax.quiver(x, z, electric_x, electric_z)
-x_charge, y_charge, z_charge = charge_position(t)
-ax.plot(x_charge, z_charge, 'bo')
-ax.set_aspect('equal')
-camera.snap()
-end = time.time()
-tempo = end - start
-print(tempo)
-animation = camera.animate()
-animation.save('celluloid_minimal_3.gif', writer = 'imagemagick')
